@@ -6,6 +6,8 @@ from mysql.connector import connect, Error
 from mcp.server import Server
 from mcp.types import Resource, Tool, TextContent
 from pydantic import AnyUrl
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -19,9 +21,9 @@ def get_db_config():
     config = {
         "host": os.getenv("MYSQL_HOST", "localhost"),
         "port": int(os.getenv("MYSQL_PORT", "3306")),
-        "user": os.getenv("MYSQL_USER"),
-        "password": os.getenv("MYSQL_PASSWORD"),
-        "database": os.getenv("MYSQL_DATABASE"),
+        "user": os.getenv("MYSQL_USER", "root"),
+        "password": os.getenv("MYSQL_PASSWORD", ""),
+        "database": os.getenv("MYSQL_DATABASE", "grocery_shop"),
         # Add charset and collation to avoid utf8mb4_0900_ai_ci issues with older MySQL versions
         # These can be overridden via environment variables for specific MySQL versions
         "charset": os.getenv("MYSQL_CHARSET", "utf8mb4"),
@@ -35,7 +37,7 @@ def get_db_config():
     # Remove None values to let MySQL connector use defaults if not specified
     config = {k: v for k, v in config.items() if v is not None}
 
-    if not all([config.get("user"), config.get("password"), config.get("database")]):
+    if not all([config.get("user"), config.get("database")]):
         logger.error("Missing required database configuration. Please check environment variables:")
         logger.error("MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE are required")
         raise ValueError("Missing required database configuration")
